@@ -1,4 +1,5 @@
 import { Activity } from 'app/models/activity';
+import { User, UserFormValues } from 'app/models/user';
 import { store } from 'app/stores/stores';
 import axios, { AxiosError, AxiosResponse } from 'axios';
 import { history } from 'index';
@@ -11,6 +12,14 @@ const sleep = (delay: number) => {
 };
 
 axios.defaults.baseURL = 'http://localhost:5000/api';
+
+axios.interceptors.request.use((config) => {
+  const token = store.commonStore.token;
+
+  if (token) config.headers.Authorization = `Bearer ${token}`;
+
+  return config;
+});
 
 axios.interceptors.response.use(
   async (response) => {
@@ -59,24 +68,28 @@ const responseBody = <T>(response: AxiosResponse<T>) => response.data;
 
 const requests = {
   get: <T>(url: string) => axios.get<T>(url).then(responseBody),
-  post: <T>(url: string, body: T) =>
-    axios.post<T>(url, body).then(responseBody),
-  put: <T>(url: string, body: T) => axios.put<T>(url, body).then(responseBody),
+  post: <T>(url: string, body: {}) => axios.post<T>(url, body).then(responseBody),
+  put: <T>(url: string, body: {}) => axios.put<T>(url, body).then(responseBody),
   del: <T>(url: string) => axios.delete<T>(url).then(responseBody),
 };
 
 const Activities = {
   list: () => requests.get<Activity[]>('/activities'),
   details: (id: string) => requests.get<Activity>(`/activities/${id}`),
-  create: (activity: Activity) =>
-    requests.post<Activity>('/activities', activity),
-  edit: (activity: Activity) =>
-    requests.put<Activity>(`/activities/${activity.id}`, activity),
+  create: (activity: Activity) => requests.post<Activity>('/activities', activity),
+  edit: (activity: Activity) => requests.put<Activity>(`/activities/${activity.id}`, activity),
   delete: (id: string) => requests.del<Activity>(`/activities/${id}`),
+};
+
+const Account = {
+  current: () => requests.get<User>('/account'),
+  login: (user: UserFormValues) => requests.post<User>('/account/login', user),
+  register: (user: UserFormValues) => requests.post<User>('/account/register', user),
 };
 
 const agent = {
   Activities,
+  Account,
 };
 
 export default agent;
