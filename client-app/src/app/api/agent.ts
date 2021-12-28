@@ -1,4 +1,5 @@
 import { Activity, ActivityFormValues } from 'app/models/activity';
+import { Photo, Profile } from 'app/models/profile';
 import { User, UserFormValues } from 'app/models/user';
 import { store } from 'app/stores/stores';
 import axios, { AxiosError, AxiosResponse } from 'axios';
@@ -89,9 +90,25 @@ const Account = {
   register: (user: UserFormValues) => requests.post<User>('/account/register', user),
 };
 
+const Profiles = {
+  get: (username: string) => requests.get<Profile>(`/profiles/${username}`),
+  uploadPhoto: (file: Blob) => {
+    let formData = new FormData();
+
+    formData.append('File', file);
+
+    return axios.post<Photo>('/photos', formData, {
+      headers: { 'Content-type': 'multipart/form-data' },
+    });
+  },
+  setMainPhoto: (id: string) => requests.post<void>(`/photos/${id}/setMain`, {}),
+  deletePhoto: (id: string) => requests.del<void>(`/photos/${id}`),
+};
+
 const agent = {
   Activities,
   Account,
+  Profiles,
 };
 
 export default agent;

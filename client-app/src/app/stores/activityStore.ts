@@ -75,6 +75,28 @@ export default class ActivityStore {
     }
   };
 
+  updateHostProfile = (profile: Profile) => {
+    const user = store.userStore.user;
+
+    if (user) {
+      this.activityRegistry.forEach((activity) => {
+        if (activity.hostUsername === user.username) {
+          activity.host!.image = profile.image;
+
+          this.updateAttendeeProfile(activity.attendees, user, profile);
+        }
+      });
+    }
+  };
+
+  private updateAttendeeProfile = (attendees: Profile[], user: Profile, profile: Profile) => {
+    attendees.forEach((attendeeProfile) => {
+      if (attendeeProfile.username === user.username) {
+        attendeeProfile.image = profile.image;
+      }
+    });
+  };
+
   private setActivity = (activity: Activity) => {
     const user = store.userStore.user;
 
