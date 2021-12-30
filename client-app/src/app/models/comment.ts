@@ -1,0 +1,13 @@
+export interface ChatComment {
+  id: number;
+  createdAt: Date;
+  body: string;
+  username: string;
+  displayName: string;
+  image: string;
+}
+
+export interface ChatCommentFormValues {
+  activityId: string;
+  body: string;
+}
