@@ -4,6 +4,9 @@ export interface User {
   token: string;
   username: string;
   image?: string;
+  followersCount: number;
+  followingCount: number;
+  following: boolean;
 }
 
 // Register DTO
