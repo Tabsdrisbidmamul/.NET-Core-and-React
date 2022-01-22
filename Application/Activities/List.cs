@@ -16,11 +16,12 @@ namespace Application.Activities
 {
     public class List
     {
-      public class Query: IRequest<Result<List<ActivityDTO>>> 
+      public class Query: IRequest<Result<PagedLists<ActivityDTO>>> 
       {
+        public ActivityParams Params { get; set; }
       }
 
-    public class Handler : IRequestHandler<Query, Result<List<ActivityDTO>>>
+    public class Handler : IRequestHandler<Query, Result<PagedLists<ActivityDTO>>>
     {
       private readonly DataContext _context;
       private readonly IMapper _mapper;
@@ -33,15 +34,36 @@ namespace Application.Activities
         _context = context;
       }
 
-      public async Task<Result<List<ActivityDTO>>> Handle(Query request, CancellationToken cancellationToken)
+      public async Task<Result<PagedLists<ActivityDTO>>> Handle(Query request, CancellationToken cancellationToken)
       {
-        var activities = await _context.Activities
+        var query = _context.Activities
+          .Where(d => d.Date >= request.Params.StartDate)
+          .OrderBy(d => d.Date)
           .ProjectTo<ActivityDTO>(
               _mapper.ConfigurationProvider, 
               new { currentUsername =  _userAccessor.GetUserName()})
-          .ToListAsync();
+          .AsQueryable();
+        
+        if(request.Params.IsGoing && !request.Params.IsHost)
+        {
+          query = query
+            .Where(x => x.Attendees.Any(a => a.Username == _userAccessor.GetUserName()));
+        }
+
+        if(request.Params.IsHost && !request.Params.IsGoing)
+        {
+          query = query
+            .Where(x => x.HostUsername == _userAccessor.GetUserName());
+        }
+
+        
           
-        return Result<List<ActivityDTO>>.Success(activities);
+        return Result<PagedLists<ActivityDTO>>.Success(
+          await PagedLists<ActivityDTO>.CreateAsync(
+            query, 
+            request.Params.PageNumber, 
+            request.Params.PageSize)
+        );
       }
     }
 

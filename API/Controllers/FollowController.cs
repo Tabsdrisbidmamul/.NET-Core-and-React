@@ -3,7 +3,6 @@ using System.Collections.Generic;
 using System.Linq;
 using Application.Followers;
 using System.Threading.Tasks;
-using Application.Followers;
 using Microsoft.AspNetCore.Mvc;
 
 namespace API.Controllers

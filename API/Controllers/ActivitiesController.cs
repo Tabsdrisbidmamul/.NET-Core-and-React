@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 using Application.Activities;
+using Application.Activities.Core;
 using Domain;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -13,9 +14,9 @@ namespace API.Controllers
   {
     
     [HttpGet]
-    public async Task<IActionResult> GetActivities(){
-      var result = await Mediator.Send(new List.Query());
-      return HandleResult(result);
+    public async Task<IActionResult> GetActivities([FromQuery]ActivityParams param){
+      var result = await Mediator.Send(new List.Query{Params = param});
+      return HandlePagedResult(result);
     }
 
     [HttpGet("{id}")]
