@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text.Json.Serialization;
 using System.Threading.Tasks;
+using MediatR;
 
 namespace Application.Profiles
 {
@@ -10,9 +11,11 @@ namespace Application.Profiles
     {
         public Guid Id { get; set; }
         public string Title { get; set; }
-        public string Property { get; set; }
+        public string Category { get; set; }
         public DateTime Date { get; set; }
         [JsonIgnore]
         public string HostUsername { get; set; }
     }
+
+
 }

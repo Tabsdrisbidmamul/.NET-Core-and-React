@@ -56,8 +56,6 @@ namespace Application.Activities
             .Where(x => x.HostUsername == _userAccessor.GetUserName());
         }
 
-        
-          
         return Result<PagedLists<ActivityDTO>>.Success(
           await PagedLists<ActivityDTO>.CreateAsync(
             query, 

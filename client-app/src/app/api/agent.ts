@@ -1,6 +1,6 @@
 import { Activity, ActivityFormValues } from 'app/models/activity';
 import { PaginatedResult } from 'app/models/pagination';
-import { Photo, Profile } from 'app/models/profile';
+import { Photo, Profile, UserActivity } from 'app/models/profile';
 import { User, UserFormValues } from 'app/models/user';
 import { store } from 'app/stores/stores';
 import axios, { AxiosError, AxiosResponse } from 'axios';
@@ -117,6 +117,8 @@ const Profiles = {
   updateFollowing: (username: string) => requests.post<void>(`/follow/${username}`, {}),
   listFollowing: (username: string, predicate: string) =>
     requests.get<Profile[]>(`/follow/${username}?predicate=${predicate}`),
+  activities: (username: string, predicate: string) =>
+    requests.get<UserActivity[]>(`/profiles/${username}/activities?predicate=${predicate}`),
 };
 
 const agent = {

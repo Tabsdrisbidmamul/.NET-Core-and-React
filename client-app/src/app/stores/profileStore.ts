@@ -1,5 +1,5 @@
 import agent from 'app/api/agent';
-import { Photo, Profile } from 'app/models/profile';
+import { Photo, Profile, UserActivity } from 'app/models/profile';
 import { makeAutoObservable, reaction, runInAction } from 'mobx';
 import { store } from './stores';
 
@@ -11,6 +11,9 @@ export default class ProfileStore {
   loadingFollowings = false;
   followings: Profile[] = [];
   activeTab = 0;
+  activityTab = 0;
+  userActivities: UserActivity[] = [];
+  loadingActivities = false;
 
   constructor() {
     makeAutoObservable(this);
@@ -18,6 +21,24 @@ export default class ProfileStore {
     reaction(
       () => this.activeTab,
       (activeTab) => {
+        if (activeTab === 2) {
+          let predicate = '';
+          switch (this.activityTab) {
+            case 0:
+              predicate = 'future';
+              break;
+            case 1:
+              predicate = 'past';
+              break;
+            case 3:
+              predicate = 'hosting';
+              break;
+          }
+          this.loadActivities(this.profile!.username, predicate);
+        } else {
+          this.userActivities = [];
+        }
+
         if (activeTab === 3 || activeTab === 4) {
           const predicate = activeTab === 3 ? 'followers' : 'following';
           this.loadFollowings(predicate);
@@ -26,10 +47,33 @@ export default class ProfileStore {
         }
       }
     );
+
+    reaction(
+      () => this.activityTab,
+      (activityTab) => {
+        let predicate = '';
+        switch (activityTab) {
+          case 0:
+            predicate = 'future';
+            break;
+          case 1:
+            predicate = 'past';
+            break;
+          case 3:
+            predicate = 'hosting';
+            break;
+        }
+        this.loadActivities(this.profile!.username, predicate);
+      }
+    );
   }
 
   setActiveTab = (activeTab: any) => {
     this.activeTab = activeTab;
+  };
+
+  setActivityTab = (activeTab: any) => {
+    this.activityTab = activeTab;
   };
 
   get isCurrentUser() {
@@ -207,5 +251,32 @@ export default class ProfileStore {
     } finally {
       this.setLoadingFollowing(false);
     }
+  };
+
+  loadActivities = async (username: string, predicate: string) => {
+    this.setLoadingActivities(true);
+
+    try {
+      if (this.profile) {
+        const activities = await agent.Profiles.activities(username, predicate);
+        this.formatDates(activities);
+        runInAction(() => {
+          this.userActivities = activities;
+        });
+      }
+    } catch (error) {
+      console.log(error);
+    } finally {
+      this.setLoadingActivities(false);
+    }
+  };
+
+  setLoadingActivities = (state: boolean) => (this.loadingActivities = state);
+
+  formatDates = (activities: UserActivity[]) => {
+    activities.map((activity) => {
+      activity.date = new Date(activity.date + 'Z');
+      return activity;
+    });
   };
 }
