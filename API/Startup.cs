@@ -61,10 +61,34 @@ namespace API
 
             app.UseMiddleware<ExceptionMiddleware>();
 
+            app.UseXContentTypeOptions();
+            app.UseReferrerPolicy(opt => opt.NoReferrer());
+            app.UseXXssProtection(opt => opt.EnabledWithBlockMode());
+            app.UseXfo(opt => opt.Deny());
+            app.UseCsp(opt => opt
+              .BlockAllMixedContent()
+              .StyleSources(s => s.Self().CustomSources("https://fonts.googleapis.com"))
+              .FontSources(s => s.Self().CustomSources(
+                "https://fonts.gstatic.com", "data:"))
+              .FormActions(s => s.Self())
+              .FrameAncestors(s => s.Self())
+              .ImageSources(s => s.Self().CustomSources("https://res.cloudinary.com"))
+              .ScriptSources(s => s.Self().CustomSources("sha256-pMVxQwJ2pH0ERhq9DYkoMfT656gHkKfxeZuz7bHiqwo="))
+            );
+
             if (env.IsDevelopment())
             {
                 app.UseSwagger();
                 app.UseSwaggerUI(c => c.SwaggerEndpoint("/swagger/v1/swagger.json", "API v1"));
+            }
+            else
+            {
+              app.Use(async (context, next) =>
+              {
+                context.Response.Headers.Add(
+                  "Strict-Transport-Security", "max-age=31536000");
+                await next.Invoke();
+              });
             }
 
             // app.UseHttpsRedirection();
