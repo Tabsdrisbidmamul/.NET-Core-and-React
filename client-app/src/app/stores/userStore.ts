@@ -72,4 +72,13 @@ export default class UserStore {
   setUser = (user: User | null) => {
     this.user = user;
   };
+
+  facebookLogin = () => {
+    window.FB.login(
+      (response) => {
+        console.log(response);
+      },
+      { scope: 'public_profile,email' }
+    );
+  };
 }
