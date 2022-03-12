@@ -19,13 +19,14 @@ import PrivateRoute from './PrivateRoute';
 
 function App() {
   const location = useLocation();
+
   const { commonStore, userStore } = useStore();
 
   useEffect(() => {
     if (commonStore.token) {
       userStore.getUser().finally(() => commonStore.setAppLoaded());
     } else {
-      commonStore.setAppLoaded();
+      userStore.getFacebookLoginStatus().then(() => commonStore.setAppLoaded());
     }
   }, [commonStore, userStore]);
 
