@@ -22,9 +22,11 @@ namespace API.Extensions
           {
             opt.User.RequireUniqueEmail = true;
             opt.Password.RequireNonAlphanumeric = false;
+            opt.SignIn.RequireConfirmedEmail = true;
           })
           .AddEntityFrameworkStores<DataContext>()
-          .AddSignInManager<SignInManager<AppUser>>();
+          .AddSignInManager<SignInManager<AppUser>>()
+          .AddDefaultTokenProviders();
 
           var key = new SymmetricSecurityKey(
             Encoding.UTF8.GetBytes(_config.GetValue<string>("Jwt:Key")));
