@@ -1,8 +1,9 @@
 import React, { Fragment } from 'react';
 import { useStore } from 'app/stores/stores';
 import { observer } from 'mobx-react-lite';
-import { Header } from 'semantic-ui-react';
+import { Item, Label } from 'semantic-ui-react';
 import ActivityListItem from './ActivityListItem';
+import { format } from 'date-fns';
 
 export default observer(function ActivityList() {
   const { activityStore } = useStore();
@@ -12,13 +13,15 @@ export default observer(function ActivityList() {
     <>
       {groupedActivities.map(([group, activityList]) => (
         <Fragment key={group}>
-          <Header sub color="teal">
-            {group}
-          </Header>
+          <Label size="large" color="blue">
+            {format(new Date(group), 'eeee do MMMM')}
+          </Label>
 
-          {activityList.map((activity) => (
-            <ActivityListItem key={activity.id} activity={activity} />
-          ))}
+          <Item.Group divided>
+            {activityList.map((activity) => (
+              <ActivityListItem key={activity.id} activity={activity} />
+            ))}
+          </Item.Group>
         </Fragment>
       ))}
     </>
